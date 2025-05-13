@@ -15,12 +15,37 @@ use bevy::{
         event::{EventWriter, Events},
         resource::Resource,
         schedule::Schedules,
-        system::Res,
+        system::{Res, ResMut},
     },
 };
 
+#[derive(Resource)]
+struct Counter(u64);
+
+// DEMONSTRATION:
+// 1. Uncomment the alternative bevy_says_hi and comment the original
+//    - The output should now should 0 repeatedly forever
+//    - Proves the ability to request MORE parameters
+// 2. Uncomment the increment system line
+//    - The output should now show the number increasing every second
+//    - Proves the ability to ADD new systems
+// 3. Comment the increment system line again
+//    - The output should now stop increasing
+//    - Proves the ability to REMOVE systems
+// 4. Swap back the bevy_says_hi
+//    - The output should no longer contain the number
+//    - Proves the ability to request LESS parameters
+
 fn bevy_says_hi() {
     println!("Hello from Bevy!");
+}
+
+// fn bevy_says_hi(counter: Res<Counter>) {
+//     println!("Hello from Bevy! {}", counter.0);
+// }
+
+fn increment(mut counter: ResMut<Counter>) {
+    counter.0 += 1;
 }
 
 /// True signature is () -> Box<App>
@@ -30,6 +55,8 @@ pub extern "C" fn create_app() -> *mut App {
 
     let mut app = App::new();
     app.add_plugins(MinimalPlugins.set(ScheduleRunnerPlugin::run_loop(Duration::from_secs(1))))
+        .insert_resource(Counter(0))
+        // .add_systems(Update, increment)
         .add_systems(Update, bevy_says_hi);
 
     // HOT RELOAD LOGIC
